@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Required for the ImageFilter.blur (Acrylic effect)
+import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'service_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,7 +11,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Key to control the side menu (Drawer)
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -17,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      // --- THE SIDE MENU (DRAWER) ---
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -38,19 +38,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       
-      // --- MAIN CONTENT ---
       body: Stack(
         children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 100), // Space for floating nav bar
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 120),
+            child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    // Custom App Bar Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -64,13 +62,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const CircleAvatar(
                           radius: 18,
-                          backgroundImage: NetworkImage('https://i.pravatar.cc/100'), // Placeholder profile pic
+                          backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
 
-                    // --- TOP CARD (Service Centers Nearby) ---
+                    // --- TOP CARD (Fixed Alignment) ---
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -80,9 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.end,
-                            children: const [
+                            children: [
                               Text('Colombo', style: TextStyle(fontWeight: FontWeight.w500)),
                               SizedBox(width: 4),
                               Icon(Icons.location_on_outlined, size: 18),
@@ -93,11 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: const [
                               Text(
                                 '24',
-                                style: TextStyle(fontSize: 64, fontWeight: FontWeight.w300, height: 1),
+                                style: TextStyle(fontSize: 64, fontWeight: FontWeight.w500, height: 1),
                               ),
                               SizedBox(width: 8),
                               Padding(
-                                padding: EdgeInsets.only(bottom: 12.0),
+                                padding: EdgeInsets.only(bottom: 10.0),
                                 child: Text(
                                   'Service Centers Nearby',
                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54),
@@ -122,9 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Stack(
                               children: [
-                                // The black progress fill
                                 Container(
-                                  width: MediaQuery.of(context).size.width * 0.45, // Simulating 60% progress
+                                  width: MediaQuery.of(context).size.width * 0.45, 
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(18),
@@ -142,16 +139,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // AI Chatbot Star Button
                         GestureDetector(
                           onTap: () {
-                            // TODO: Navigate to AI Chatbot Screen
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('AI Chatbot launching soon!')),
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
@@ -164,9 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // --- PREVIOUS BOOKINGS (Horizontal List) ---
-                    Row(
-                      children: const [
+                    // --- PREVIOUS BOOKINGS ---
+                    const Row(
+                      children: [
                         Text(
                           'Previous Bookings ',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -176,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
-                      height: 130, // Height for the cards + text
+                      height: 130, 
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: [
@@ -188,9 +183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // --- EXPLORE MORE (Vertical List) ---
-                    Row(
-                      children: const [
+                    // --- EXPLORE MORE (LIVE FIREBASE DATA!) ---
+                    const Row(
+                      children: [
                         Text(
                           'Explore More ',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -199,8 +194,50 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    _buildLargeCard('Car Muscle Service Center', 'Kaduwela', '4.9'),
-                    _buildLargeCard('AutoFix Hub', 'Colombo 07', '4.7'),
+                    
+                    // The Magic StreamBuilder
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance.collection('service_centers').snapshots(),
+                      builder: (context, snapshot) {
+                        // 1. If it's still loading from the database, show a spinner
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator(color: Colors.black));
+                        }
+                        
+                        // 2. If there's an error or no data
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Text("No service centers found near you.");
+                        }
+
+                        // 3. Loop through the Firebase documents and build the UI cards!
+                        // 3. Loop through the Firebase documents and build the UI cards!
+                        return Column(
+                          children: snapshot.data!.docs.map((doc) {
+                            String centerId = doc.id; // Get the unique Firebase ID
+                            String name = doc['name'] ?? 'Unknown Center';
+                            String location = doc['location'] ?? 'Unknown Location';
+                            String rating = doc['rating'] ?? 'N/A';
+                            
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ServiceDetailScreen(
+                                      centerId: centerId,
+                                      name: name,
+                                      location: location,
+                                      rating: rating,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: _buildLargeCard(name, location, rating),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -215,13 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(40),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), // The blur effect!
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), 
                 child: Container(
                   height: 70,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6), // Semi-transparent white
+                    color: Colors.white.withOpacity(0.7), 
                     borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -241,18 +278,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper Widget for Drawer Items
   Widget _buildDrawerItem(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      onTap: () {
-        // Handle navigation
-      },
+      onTap: () {},
     );
   }
 
-  // Helper Widget for Previous Bookings (Horizontal Cards)
   Widget _buildSmallCard(String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.only(right: 16.0),
@@ -277,16 +310,12 @@ class _HomeScreenState extends State<HomeScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
-          ),
+          Text(subtitle, style: const TextStyle(fontSize: 10, color: Colors.grey)),
         ],
       ),
     );
   }
 
-  // Helper Widget for Explore More (Vertical Cards)
   Widget _buildLargeCard(String title, String subtitle, String rating) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -326,7 +355,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper Widget for Bottom Nav Icons
   Widget _buildNavItem(IconData icon, String label, bool isActive) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
