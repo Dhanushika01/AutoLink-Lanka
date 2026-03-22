@@ -5,6 +5,8 @@ import 'home_screen.dart';
 import 'book_service_screen.dart';
 import 'notification_screen.dart';
 import 'login_screen.dart';
+import 'my_bookings_screen.dart';
+import 'saved_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -71,11 +73,11 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Image.asset('assets/images/logo.png', height: 60),
               ),
             ),
-            _buildDrawerItem(Icons.home_outlined, 'Home'),
-            _buildDrawerItem(Icons.list_alt, 'My Bookings'),
-            _buildDrawerItem(Icons.notifications_none, 'Notifications'),
-            _buildDrawerItem(Icons.bookmark_border, 'Saved'),
-            _buildDrawerItem(Icons.person_outline, 'Profile'),
+            _buildDrawerItem(context, Icons.home_outlined, 'Home', const HomeScreen()),
+            _buildDrawerItem(context, Icons.list_alt, 'My Bookings', const MyBookingsScreen()),
+            _buildDrawerItem(context, Icons.notifications_none, 'Notifications', const NotificationScreen()),
+            _buildDrawerItem(context, Icons.bookmark_border, 'Saved', const SavedScreen()),
+            _buildDrawerItem(context, Icons.person_outline, 'Profile', const AccountScreen()),
           ],
         ),
       ),
@@ -226,13 +228,17 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title) {
+  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, Widget destination) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      onTap: () {},
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+      },
     );
   }
+
 
   Widget _buildProfileOption(IconData icon, String title) {
     return Padding(
