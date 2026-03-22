@@ -30,12 +30,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Top Right Grey Circle
           Positioned(
             top: -50,
             right: -50,
             child: Hero(
-              tag: 'circle1', // Keeps the circle anchored during transition
+              tag: 'circle1',
               child: Container(
                 width: 180,
                 height: 180,
@@ -47,12 +46,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             ),
           ),
           
-          // Bottom Left Grey Circle
           Positioned(
             bottom: -50,
             left: -50,
             child: Hero(
-              tag: 'circle2', // Keeps the circle anchored during transition
+              tag: 'circle2',
               child: Container(
                 width: 180,
                 height: 180,
@@ -63,15 +61,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
             ),
           ),
-          // ... The rest of your SafeArea and Registration form stays exactly the same
-          // Main Content
+
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Back Button & Logo Row
                   Row(
                     children: [
                       IconButton(
@@ -81,11 +77,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       const Spacer(),
                       Image.asset('assets/images/logo.png', height: 40),
                       const Spacer(),
-                      const SizedBox(width: 48), // Balances the back button
+                      const SizedBox(width: 48),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
                   const Text(
                     'Create An Account',
                     textAlign: TextAlign.center,
@@ -97,7 +92,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Fields
                   _buildTextField('Name', 'Your Name', _nameController),
                   const SizedBox(height: 16),
                   
@@ -122,10 +116,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   }),
                   const SizedBox(height: 32),
 
-                  // Next Button
                   ElevatedButton(
                     onPressed: () async {
-                      // Basic validation
+
                       if (_passwordController.text != _rePasswordController.text) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Passwords do not match!')),
@@ -134,10 +127,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       }
 
                       setState(() {
-                        _isLoading = true; // Start loading spinner
+                        _isLoading = true;
                       });
 
-                      // Call our Auth Service
                       String? result = await AuthService().signUpUser(
                         name: _nameController.text,
                         email: _emailController.text,
@@ -145,11 +137,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       );
 
                       setState(() {
-                        _isLoading = false; // Stop loading spinner
+                        _isLoading = false;
                       });
 
                       if (result == 'success') {
-                        // Registration worked! Navigate to the Success Screen!
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -157,7 +148,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           ),
                         );
                       } else {
-                        // Show the error message from Firebase
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(result ?? 'An error occurred')),
                         );
@@ -182,8 +172,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Divider
                   const Row(
                     children: [
                       Expanded(child: Divider(color: Colors.grey)),
@@ -199,7 +187,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Social Icons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -220,7 +207,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  // Helper method for standard text fields
   Widget _buildTextField(String label, String hint, TextEditingController controller, {Widget? suffixIcon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +233,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  // Helper method specifically for password fields
   Widget _buildPasswordField(String label, TextEditingController controller, bool isObscure, VoidCallback toggleVisibility) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

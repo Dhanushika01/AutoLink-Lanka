@@ -52,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             top: _getCircle1Top(),
             left: _getCircle1Left(),
             child: Hero(
-              tag: 'circle1', // Connects to the Top Right circle on Login
+              tag: 'circle1',
               child: Container(
                 width: 350,
                 height: 350,
@@ -69,7 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             top: _getCircle2Top(),
             right: _getCircle2Right(),
             child: Hero(
-              tag: 'circle2', // Connects to the Bottom Left circle on Login
+              tag: 'circle2',
               child: Container(
                 width: 250,
                 height: 250,
@@ -80,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ),
-          // ... The rest of your SafeArea and PageView code stays exactly the same
+
           SafeArea(
             child: Column(
               children: [
@@ -146,7 +146,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildPage(BuildContext context, {required String title, String? imagePath}) {
     if (imagePath == null) {
-      // Layout for "Welcome!" and "Are You Ready!" (Centered vertically)
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Center(
@@ -154,7 +153,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 34, // Slightly larger to match your design
+              fontSize: 34,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -162,12 +161,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       );
     } else {
-      // Layout for the pages with the car illustrations
+
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           children: [
-            const SizedBox(height: 60), // Pushes text down from the top logo
+            const SizedBox(height: 60),
             Text(
               title,
               textAlign: TextAlign.center,
@@ -178,14 +177,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 1.3,
               ),
             ),
-            const Spacer(), // Creates flexible space to push the image down
+            const Spacer(),
             Image.asset(
               imagePath,
-              // Make the image take up 90% of the screen width so it's large and clear!
               width: MediaQuery.of(context).size.width * 0.9, 
               fit: BoxFit.contain,
             ),
-            const SizedBox(height: 100), // Keeps the image safely above the Next button
+            const SizedBox(height: 100),
           ],
         ),
       );

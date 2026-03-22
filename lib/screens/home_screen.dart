@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:ui'; // Required for the acrylic blur effect!
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'service_detail_screen.dart';
@@ -92,18 +92,15 @@ class _HomeScreenState extends State<HomeScreen> {
         valueListenable: globalLocation,
         builder: (context, currentLocation, child) {
           return SafeArea(
-            bottom: false, // Let the main_screen handle the bottom nav area
+            bottom: false,
             child: Stack(
               children: [
-                // --- LAYER 1: THE SCROLLING CONTENT ---
                 SingleChildScrollView(
-                  // Added padding to the top so it starts below the fixed App Bar
                   padding: const EdgeInsets.only(top: 80, bottom: 120, left: 24, right: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 10),
-
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance.collection('service_centers').snapshots(),
                         builder: (context, snapshot) {
@@ -140,10 +137,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                
-                                // --- FIXED TEXT ALIGNMENT ---
+
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end, // Anchors to the bottom
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
                                       nearbyCount.toString(), 
@@ -151,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ), 
                                     const SizedBox(width: 12),
                                     const Padding(
-                                      // Fine-tuned padding to visually sit on the exact same baseline as the huge number
                                       padding: EdgeInsets.only(bottom: 16.0),
                                       child: Text(
                                         'Service Centers Nearby', 
@@ -291,17 +286,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // --- LAYER 2: FIXED ACRYLIC BLUR APP BAR ---
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: ClipRRect( // Clips the blur so it doesn't bleed
+                  child: ClipRRect(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        color: Colors.white.withOpacity(0.8), // 80% opacity white over the blur
+                        color: Colors.white.withOpacity(0.8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

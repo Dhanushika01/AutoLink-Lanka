@@ -41,8 +41,6 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       String? userId = FirebaseAuth.instance.currentUser?.uid;
-
-      // 1. THIS SAVES THE BOOKING
       await FirebaseFirestore.instance.collection('bookings').add({
         'user_id': userId ?? 'guest_user',
         'center_id': widget.centerId,
@@ -55,7 +53,6 @@ class _BookingScreenState extends State<BookingScreen> {
         'created_at': FieldValue.serverTimestamp(),
       });
 
-      // 2. THIS CREATES THE NOTIFICATION INSTANTLY
       if (userId != null) {
         await FirebaseFirestore.instance.collection('notifications').add({
           'user_id': userId,
@@ -68,7 +65,6 @@ class _BookingScreenState extends State<BookingScreen> {
 
       setState(() => _isBooking = false);
 
-      // 3. SHOWS SUCCESS MESSAGE & LEAVES PAGE
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Booking Confirmed Successfully!')),

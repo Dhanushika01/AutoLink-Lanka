@@ -68,8 +68,7 @@ class LoyaltyScreen extends StatelessWidget {
                   
                   Text(currentTier, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                   const SizedBox(height: 24),
-                  
-                  // --- PROGRESS BAR ---
+
                   Stack(
                     children: [
                       Container(height: 24, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12))),

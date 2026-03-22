@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // We'll navigate back to login after this
+import 'home_screen.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -10,7 +10,6 @@ class SuccessScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Top Left Grey Circle
           Positioned(
             top: 100,
             left: -50,
@@ -24,7 +23,6 @@ class SuccessScreen extends StatelessWidget {
             ),
           ),
           
-          // Bottom Right Grey Circle
           Positioned(
             bottom: -50,
             right: -50,
@@ -38,7 +36,6 @@ class SuccessScreen extends StatelessWidget {
             ),
           ),
 
-          // Main Content
           SafeArea(
             child: Center(
               child: Padding(
@@ -61,18 +58,16 @@ class SuccessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 40),
 
-                    // Next Button
                     FloatingActionButton(
                       backgroundColor: Colors.black,
                       shape: const CircleBorder(),
                       onPressed: () {
-                        // Send them to the Login Screen to sign in with their new account!
                         Navigator.pushAndRemoveUntil(
                           context,
-                          // Make sure to import 'home_screen.dart' at the top of the file!
+
 MaterialPageRoute(builder: (context) => const HomeScreen()),
 
-                          (route) => false, // This clears the navigation history so they can't hit "back" to the success screen
+                          (route) => false,
                         );
                       },
                       child: const Icon(Icons.arrow_forward_ios, color: Colors.white),

@@ -4,7 +4,7 @@ import 'home_screen.dart';
 import 'book_service_screen.dart';
 import 'notification_screen.dart';
 import 'account_screen.dart';
-import '../utils/globals.dart'; // Import globals!
+import '../utils/globals.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -20,7 +20,6 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // Listen to the global tab index!
       body: ValueListenableBuilder<int>(
         valueListenable: globalTabIndex,
         builder: (context, currentIndex, child) {
@@ -63,7 +62,7 @@ class MainScreen extends StatelessWidget {
     bool isActive = currentIndex == index;
     return GestureDetector(
       onTap: () {
-        globalTabIndex.value = index; // Changes tab when clicking bottom bar!
+        globalTabIndex.value = index;
       },
       behavior: HitTestBehavior.opaque,
       child: Column(

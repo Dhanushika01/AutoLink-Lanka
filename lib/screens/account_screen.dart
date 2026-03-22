@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/globals.dart';
-import 'main_screen.dart';
 import 'my_bookings_screen.dart';
 import 'saved_screen.dart';
 import 'login_screen.dart';
 import 'loyalty_screen.dart';
+import 'privacy_security_screen.dart';
+import 'payment_method_screen.dart';
+import 'help_support_screen.dart';
+import 'report_problem_screen.dart';
+
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -22,7 +27,6 @@ class _AccountScreenState extends State<AccountScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-  // --- LOCAL DEVICE STORAGE LOGIC ---
   Future<void> _pickAndSaveImageLocally() async {
     if (userId == null) return;
 
@@ -30,16 +34,12 @@ class _AccountScreenState extends State<AccountScreen> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      // Save the file path to the device's local memory
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('profile_pic_$userId', image.path);
-      
-      // Update the global state so ALL screens change instantly!
       globalProfileImagePath.value = image.path; 
     }
   }
 
-  // --- RENAME LOGIC ---
   void _editName(String currentName) {
     TextEditingController nameController = TextEditingController(text: currentName);
     showDialog(
@@ -76,7 +76,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // --- LOGOUT LOGIC ---
   Future<void> _logout() async {
     showDialog(
       context: context,
@@ -109,8 +108,6 @@ class _AccountScreenState extends State<AccountScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      
-      // --- THE FIXED SIDEBAR (DRAWER) ---
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -126,170 +123,188 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
       
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 120),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 10),
-                // Top App Bar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(icon: const Icon(Icons.menu, color: Colors.black), onPressed: () => _scaffoldKey.currentState!.openDrawer()),
-                    const Text('Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 48), // Balances the menu icon
-                  ],
-                ),
-                const SizedBox(height: 32),
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 80, bottom: 120, left: 24, right: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+                    builder: (context, userSnapshot) {
+                      String displayName = 'Loading...';
 
-                // --- LIVE USER DATA STREAM ---
-                StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
-                  builder: (context, userSnapshot) {
-                    String displayName = 'Loading...';
+                      if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                        var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                        displayName = userData['name'] ?? 'Unknown User';
+                      }
 
-                    if (userSnapshot.hasData && userSnapshot.data!.exists) {
-                      var userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                      displayName = userData['name'] ?? 'Unknown User';
-                    }
-
-                    return Column(
-                      children: [
-                        Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            // --- LIVE PROFILE PICTURE ---
-                            ValueListenableBuilder<String?>(
-                              valueListenable: globalProfileImagePath,
-                              builder: (context, imagePath, child) {
-                                return CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: Colors.grey.shade300,
-                                  backgroundImage: (imagePath != null && File(imagePath).existsSync()) 
-                                      ? FileImage(File(imagePath)) 
-                                      : null,
-                                  child: (imagePath == null || !File(imagePath).existsSync()) 
-                                      ? const Icon(Icons.person, size: 60, color: Colors.white) 
-                                      : null,
-                                );
-                              }
-                            ),
-                            GestureDetector(
-                              onTap: _pickAndSaveImageLocally,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.black, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                                child: const Icon(Icons.add_a_photo, color: Colors.white, size: 16),
+                      return Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              ValueListenableBuilder<String?>(
+                                valueListenable: globalProfileImagePath,
+                                builder: (context, imagePath, child) {
+                                  return CircleAvatar(
+                                    radius: 60,
+                                    backgroundColor: Colors.grey.shade300,
+                                    backgroundImage: (imagePath != null && File(imagePath).existsSync()) 
+                                        ? FileImage(File(imagePath)) 
+                                        : null,
+                                    child: (imagePath == null || !File(imagePath).existsSync()) 
+                                        ? const Icon(Icons.person, size: 60, color: Colors.white) 
+                                        : null,
+                                  );
+                                }
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(displayName, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () => _editName(displayName),
-                              child: const Icon(Icons.edit_outlined, size: 20, color: Colors.black87),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }
-                ),
-                const SizedBox(height: 4),
-                Text(userEmail, style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 32),
-
-                // --- LIVE LOYALTY SHORTCUT CARD ---
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('bookings').where('user_id', isEqualTo: userId).snapshots(),
-                  builder: (context, snapshot) {
-                    int totalBookings = snapshot.hasData ? snapshot.data!.docs.length : 0;
-                    
-                    String currentTier = 'MEMBER';
-                    String nextTier = 'Silver';
-                    int nextGoal = 2;
-                    Color badgeColor = Colors.grey;
-
-                    if (totalBookings >= 50) {
-                      currentTier = 'PLATINUM';
-                      nextTier = 'Elite';
-                      nextGoal = 50; 
-                      badgeColor = Colors.blueAccent;
-                    } else if (totalBookings >= 20) {
-                      currentTier = 'GOLD';
-                      nextTier = 'Platinum';
-                      nextGoal = 50;
-                      badgeColor = Colors.amber;
-                    } else if (totalBookings >= 2) {
-                      currentTier = 'SILVER';
-                      nextTier = 'Gold';
-                      nextGoal = 20;
-                      badgeColor = Colors.blueGrey;
-                    }
-
-                    double progress = totalBookings >= 50 ? 1.0 : (totalBookings / nextGoal);
-                    int remaining = totalBookings >= 50 ? 0 : (nextGoal - totalBookings);
-
-                    return GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoyaltyScreen())),
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(24)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(currentTier, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                                Icon(Icons.workspace_premium, color: badgeColor, size: 40),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              totalBookings >= 50 ? 'You have reached the highest tier!' : 'Book $remaining More Services to Get $nextTier',
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Stack(
-                              children: [
-                                Container(height: 16, decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(10))),
-                                FractionallySizedBox(
-                                  widthFactor: progress,
-                                  child: Container(height: 16, decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10))),
+                              GestureDetector(
+                                onTap: _pickAndSaveImageLocally,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(color: Colors.black, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                                  child: const Icon(Icons.add_a_photo, color: Colors.white, size: 16),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                ),
-                const SizedBox(height: 16),
-                const Divider(color: Colors.grey, thickness: 1),
-                const SizedBox(height: 16),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(displayName, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _editName(displayName),
+                                child: const Icon(Icons.edit_outlined, size: 20, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  ),
+                  const SizedBox(height: 4),
+                  Text(userEmail, style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 32),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('bookings').where('user_id', isEqualTo: userId).snapshots(),
+                    builder: (context, snapshot) {
+                      int totalBookings = snapshot.hasData ? snapshot.data!.docs.length : 0;                      
+                      String currentTier = 'MEMBER';
+                      String nextTier = 'Silver';
+                      int nextGoal = 2;
+                      Color badgeColor = Colors.grey;
 
-                // --- MENU OPTIONS ---
-                _buildMenuRow(Icons.shield_outlined, 'Privacy And Security', () {}),
-                _buildMenuRow(Icons.credit_card, 'Payment Method', () {}),
-                _buildMenuRow(Icons.help_outline, 'Help & Support', () {}),
-                _buildMenuRow(Icons.outlined_flag, 'Report a problem', () {}),
-                _buildMenuRow(Icons.logout, 'Log out', _logout), 
-                
-                const SizedBox(height: 40),
-              ],
+                      if (totalBookings >= 50) {
+                        currentTier = 'PLATINUM';
+                        nextTier = 'Elite';
+                        nextGoal = 50; 
+                        badgeColor = Colors.blueAccent;
+                      } else if (totalBookings >= 20) {
+                        currentTier = 'GOLD';
+                        nextTier = 'Platinum';
+                        nextGoal = 50;
+                        badgeColor = Colors.amber;
+                      } else if (totalBookings >= 2) {
+                        currentTier = 'SILVER';
+                        nextTier = 'Gold';
+                        nextGoal = 20;
+                        badgeColor = Colors.blueGrey;
+                      }
+
+                      double progress = totalBookings >= 50 ? 1.0 : (totalBookings / nextGoal);
+                      int remaining = totalBookings >= 50 ? 0 : (nextGoal - totalBookings);
+
+                      return GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoyaltyScreen())),
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(24)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(currentTier, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                                  Icon(Icons.workspace_premium, color: badgeColor, size: 40),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                totalBookings >= 50 ? 'You have reached the highest tier!' : 'Book $remaining More Services to Get $nextTier',
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Stack(
+                                children: [
+                                  Container(height: 16, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                                  FractionallySizedBox(
+                                    widthFactor: progress,
+                                    child: Container(height: 16, decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10))),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(color: Colors.grey, thickness: 1),
+                  const SizedBox(height: 16),
+
+                  _buildMenuRow(Icons.shield_outlined, 'Privacy And Security', () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacySecurityScreen()));
+                  }),
+                  _buildMenuRow(Icons.credit_card, 'Payment Method', () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodScreen()));
+                  }),
+                  _buildMenuRow(Icons.help_outline, 'Help & Support', () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
+                  }),
+                  _buildMenuRow(Icons.outlined_flag, 'Report a problem', () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportProblemScreen()));
+                  }),
+                  _buildMenuRow(Icons.logout, 'Log out', _logout), 
+                  
+                ],
+              ),
             ),
-          ),
+
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    color: Colors.white.withOpacity(0.8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.menu, color: Colors.black), 
+                          onPressed: () => _scaffoldKey.currentState!.openDrawer()
+                        ),
+                        const Text('Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 24),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
