@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'service_detail_screen.dart';
-import 'book_service_screen.dart';
+import 'home_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class BookServiceScreen extends StatefulWidget {
+  const BookServiceScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<BookServiceScreen> createState() => _BookServiceScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _BookServiceScreenState extends State<BookServiceScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
+
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -58,8 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                         ),
                         const Text(
-                          'AutoLink',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          'Book A Service',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const CircleAvatar(
                           radius: 18,
@@ -69,126 +72,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text('Colombo', style: TextStyle(fontWeight: FontWeight.w500)),
-                              SizedBox(width: 4),
-                              Icon(Icons.location_on_outlined, size: 18),
-                            ],
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: const [
-                              Text(
-                                '24',
-                                style: TextStyle(fontSize: 64, fontWeight: FontWeight.w500, height: 1),
-                              ),
-                              SizedBox(width: 8),
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  'Service Centers Nearby',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Stack(
-                              children: [
-                                Container(
-                                  width: MediaQuery.of(context).size.width * 0.45, 
-                                  decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                ),
-                                const Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(right: 12.0),
-                                    child: Icon(Icons.flag_outlined, size: 20, color: Colors.grey),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value.toLowerCase();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search....',
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        suffixIcon: const Icon(Icons.search, color: Colors.black, size: 28),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         ),
-                        const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('AI Chatbot launching soon!')),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                            ),
-                            child: const Icon(Icons.star_border, color: Colors.black, size: 22),
-                          ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.black, width: 1.5),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-
-                    const Row(
-                      children: [
-                        Text(
-                          'Previous Bookings ',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: Colors.black, width: 2),
                         ),
-                        Icon(Icons.arrow_forward_ios, size: 14),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 130, 
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _buildSmallCard('Red Service Center', 'Malabe'),
-                          _buildSmallCard('Vanilla Service Center', 'Kaduwela'),
-                          _buildSmallCard('LOL Service Center', 'Battaramulla'),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    const Row(
-                      children: [
-                        Text(
-                          'Explore More ',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Icon(Icons.arrow_forward_ios, size: 14),
-                      ],
+                    const Text(
+                      'Near Your Area >',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
 
@@ -198,13 +111,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(child: CircularProgressIndicator(color: Colors.black));
                         }
-
+                        
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Text("No service centers found near you.");
+                          return const Text("No service centers found.");
+                        }
+
+                        var filteredDocs = snapshot.data!.docs.where((doc) {
+                          String name = (doc['name'] ?? '').toString().toLowerCase();
+                          return name.contains(_searchQuery);
+                        }).toList();
+
+                        if (filteredDocs.isEmpty) {
+                          return const Text("No results match your search.");
                         }
 
                         return Column(
-                          children: snapshot.data!.docs.map((doc) {
+                          children: filteredDocs.map((doc) {
                             String centerId = doc.id;
                             String name = doc['name'] ?? 'Unknown Center';
                             String location = doc['location'] ?? 'Unknown Location';
@@ -254,22 +176,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildNavItem(Icons.home, 'Home', true),
-                      _buildNavItem(Icons.home, 'Home', true),
-
                       GestureDetector(
                         onTap: () {
                           Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) => const BookServiceScreen(),
+                              pageBuilder: (context, animation1, animation2) => const HomeScreen(),
                               transitionDuration: Duration.zero,
                             ),
                           );
                         },
-                        child: _buildNavItem(Icons.calendar_today_outlined, 'Book', false),
+                        child: _buildNavItem(Icons.home_outlined, 'Home', false),
                       ),
-
+                      _buildNavItem(Icons.calendar_today, 'Book', true),
                       _buildNavItem(Icons.notifications_none, 'Notification', false),
                       _buildNavItem(Icons.person_outline, 'Account', false),
                     ],
@@ -291,39 +210,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSmallCard(String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 100,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: 100,
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Text(subtitle, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLargeCard(String title, String subtitle, String rating) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -331,20 +220,23 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Colors.grey.shade300,
               borderRadius: BorderRadius.circular(20),
             ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
               ),
               Row(
                 children: [
