@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
-import 'home_screen.dart';
-import 'book_service_screen.dart';
-import 'notification_screen.dart';
-import 'login_screen.dart';
-import 'loyalty_screen.dart';
 import '../utils/globals.dart';
+import 'main_screen.dart';
 import 'my_bookings_screen.dart';
 import 'saved_screen.dart';
-
+import 'login_screen.dart';
+import 'loyalty_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -26,29 +21,8 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final String? userId = FirebaseAuth.instance.currentUser?.uid;
-  
-  File? _localProfileImage; // Holds the image file from the device
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLocalImage(); // Load the saved image when the screen opens
-  }
 
   // --- LOCAL DEVICE STORAGE LOGIC ---
-  Future<void> _loadLocalImage() async {
-    if (userId == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    // Look for the image path saved specifically for this user
-    String? imagePath = prefs.getString('profile_pic_$userId');
-    
-    if (imagePath != null && File(imagePath).existsSync()) {
-      setState(() {
-        _localProfileImage = File(imagePath);
-      });
-    }
-  }
-
   Future<void> _pickAndSaveImageLocally() async {
     if (userId == null) return;
 
@@ -56,17 +30,16 @@ class _AccountScreenState extends State<AccountScreen> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      // 1. Save the file path to the device's local memory
+      // Save the file path to the device's local memory
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('profile_pic_$userId', image.path);
       
-      // 2. Update the global state so ALL screens change instantly!
+      // Update the global state so ALL screens change instantly!
       globalProfileImagePath.value = image.path; 
     }
   }
 
-
-  // --- RENAME LOGIC (Still uses Firestore) ---
+  // --- RENAME LOGIC ---
   void _editName(String currentName) {
     TextEditingController nameController = TextEditingController(text: currentName);
     showDialog(
@@ -136,7 +109,8 @@ class _AccountScreenState extends State<AccountScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      // --- COPY THIS OVER THE OLD DRAWER ---
+      
+      // --- THE FIXED SIDEBAR (DRAWER) ---
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -151,7 +125,6 @@ class _AccountScreenState extends State<AccountScreen> {
           ],
         ),
       ),
-
       
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 120),
@@ -161,9 +134,19 @@ class _AccountScreenState extends State<AccountScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 10),
+                // Top App Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(icon: const Icon(Icons.menu, color: Colors.black), onPressed: () => _scaffoldKey.currentState!.openDrawer()),
+                    const Text('Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 48), // Balances the menu icon
+                  ],
+                ),
+                const SizedBox(height: 32),
 
-                // --- LIVE USER DATA STREAM (Name from DB, Image from Device) ---
+                // --- LIVE USER DATA STREAM ---
                 StreamBuilder<DocumentSnapshot>(
                   stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
                   builder: (context, userSnapshot) {
@@ -179,14 +162,21 @@ class _AccountScreenState extends State<AccountScreen> {
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.grey.shade300,
-                              // Load the local file if it exists!
-                              backgroundImage: _localProfileImage != null ? FileImage(_localProfileImage!) : null,
-                              child: _localProfileImage == null 
-                                ? const Icon(Icons.person, size: 60, color: Colors.white) 
-                                : null,
+                            // --- LIVE PROFILE PICTURE ---
+                            ValueListenableBuilder<String?>(
+                              valueListenable: globalProfileImagePath,
+                              builder: (context, imagePath, child) {
+                                return CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: Colors.grey.shade300,
+                                  backgroundImage: (imagePath != null && File(imagePath).existsSync()) 
+                                      ? FileImage(File(imagePath)) 
+                                      : null,
+                                  child: (imagePath == null || !File(imagePath).existsSync()) 
+                                      ? const Icon(Icons.person, size: 60, color: Colors.white) 
+                                      : null,
+                                );
+                              }
                             ),
                             GestureDetector(
                               onTap: _pickAndSaveImageLocally,
@@ -305,7 +295,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // --- COPY THIS OVER THE OLD HELPER METHOD AT THE BOTTOM OF THE FILE ---
   Widget _buildDrawerItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
@@ -316,7 +305,6 @@ class _AccountScreenState extends State<AccountScreen> {
       },
     );
   }
-
 
   Widget _buildMenuRow(IconData icon, String title, VoidCallback onTap) {
     return InkWell(
