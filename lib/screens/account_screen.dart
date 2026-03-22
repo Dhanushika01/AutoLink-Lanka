@@ -6,6 +6,8 @@ import 'book_service_screen.dart';
 import 'notification_screen.dart';
 import 'login_screen.dart';
 import 'loyalty_screen.dart';
+import 'payment_methods_screen.dart';
+
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -170,7 +172,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 ),
                                 Container(
                                   height: 16,
-                                  width: MediaQuery.of(context).size.width * 0.45, // Simulates the progress fill
+                                  width: MediaQuery.of(context).size.width * 0.45,
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(10),
@@ -187,7 +189,12 @@ class _AccountScreenState extends State<AccountScreen> {
                     const SizedBox(height: 16),
 
                     _buildMenuRow(Icons.shield_outlined, 'Privacy And Security', () {}),
-                    _buildMenuRow(Icons.credit_card, 'Payment Method', () {}),
+                    _buildMenuRow(Icons.credit_card, 'Payment Method', () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PaymentMethodsScreen()),
+                      );
+                    }),
                     _buildMenuRow(Icons.help_outline, 'Help & Support', () {}),
                     _buildMenuRow(Icons.outlined_flag, 'Report a problem', () {}),
                     _buildMenuRow(Icons.person_add_alt_1_outlined, 'Add account', () {}),
