@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main_screen.dart';
 
+
 class BookingScreen extends StatefulWidget {
   final String centerId;
   final String centerName;
@@ -41,6 +42,7 @@ class _BookingScreenState extends State<BookingScreen> {
     try {
       String? userId = FirebaseAuth.instance.currentUser?.uid;
 
+      // 1. THIS SAVES THE BOOKING
       await FirebaseFirestore.instance.collection('bookings').add({
         'user_id': userId ?? 'guest_user',
         'center_id': widget.centerId,
@@ -53,8 +55,20 @@ class _BookingScreenState extends State<BookingScreen> {
         'created_at': FieldValue.serverTimestamp(),
       });
 
+      // 2. THIS CREATES THE NOTIFICATION INSTANTLY
+      if (userId != null) {
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'user_id': userId,
+          'title': 'Your Booking Confirmed!',
+          'message': 'Your AutoLink booking for ${widget.centerName} has been confirmed successfully.',
+          'is_cancelled': false,
+          'created_at': FieldValue.serverTimestamp(),
+        });
+      }
+
       setState(() => _isBooking = false);
 
+      // 3. SHOWS SUCCESS MESSAGE & LEAVES PAGE
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Booking Confirmed Successfully!')),
@@ -191,7 +205,7 @@ class _BookingScreenState extends State<BookingScreen> {
     required bool isDark,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       icon: Icon(Icons.keyboard_arrow_down, color: isDark ? Colors.white : Colors.black),
       dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
       style: TextStyle(
