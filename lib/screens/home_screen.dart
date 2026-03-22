@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'service_detail_screen.dart';
-import 'book_service_screen.dart';
 import 'notification_screen.dart';
 import 'account_screen.dart';
 import 'my_bookings_screen.dart';

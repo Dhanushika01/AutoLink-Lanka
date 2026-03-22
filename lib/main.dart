@@ -21,7 +21,7 @@ class AutoLinkApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'SFProRounded', // Applied globally here!
+        fontFamily: 'SFProRounded',
       ),
       home: const SplashScreen(),
     );

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'service_detail_screen.dart';
 
 class SavedScreen extends StatelessWidget {
   const SavedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -24,18 +29,60 @@ class SavedScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(24.0),
-          itemCount: 4,
-          itemBuilder: (context, index) {
-            return _buildLargeCard('Car Muscle Service Center', 'Kaduwela', '4.9');
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId ?? 'guest')
+              .collection('saved_centers')
+              .orderBy('saved_at', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(color: Colors.black));
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(
+                child: Text('No saved service centers yet.', style: TextStyle(color: Colors.grey)),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(24.0),
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                var doc = snapshot.data!.docs[index];
+                String centerId = doc['center_id'];
+                String title = doc['name'] ?? 'Unknown';
+                String subtitle = doc['location'] ?? 'Unknown Location';
+                String rating = doc['rating'] ?? 'N/A';
+                String imageUrl = doc['image_url'] ?? '';
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ServiceDetailScreen(
+                          centerId: centerId,
+                          name: title,
+                          location: subtitle,
+                          rating: rating,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _buildLargeCard(title, subtitle, rating, imageUrl),
+                );
+              },
+            );
           },
         ),
       ),
     );
   }
 
-  Widget _buildLargeCard(String title, String subtitle, String rating) {
+  Widget _buildLargeCard(String title, String subtitle, String rating, String imageUrl) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
@@ -47,6 +94,12 @@ class SavedScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
               borderRadius: BorderRadius.circular(20),
+              image: imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
           ),
           const SizedBox(height: 12),
