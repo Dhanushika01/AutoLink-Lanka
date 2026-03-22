@@ -5,8 +5,7 @@ import 'home_screen.dart';
 import 'book_service_screen.dart';
 import 'notification_screen.dart';
 import 'login_screen.dart';
-import 'my_bookings_screen.dart';
-import 'saved_screen.dart';
+import 'loyalty_screen.dart'; // Import the new Loyalty Screen!
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -18,6 +17,7 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Firebase Logout Method
   Future<void> _logout() async {
     showDialog(
       context: context,
@@ -36,10 +36,11 @@ class _AccountScreenState extends State<AccountScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             ),
             onPressed: () async {
-              Navigator.pop(context);
-              await FirebaseAuth.instance.signOut();
+              Navigator.pop(context); // Close dialog
+              await FirebaseAuth.instance.signOut(); // Tell Firebase to log out
               
               if (mounted) {
+                // Send user back to the Login Screen and clear navigation history
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -56,12 +57,14 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String userEmail = FirebaseAuth.instance.currentUser?.email ?? 'user@example.com';
+    // Get the current user's email to display
+    String userEmail = FirebaseAuth.instance.currentUser?.email ?? 'johndoe@gmail.com';
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-
+      
+      // --- THE SIDE MENU (DRAWER) ---
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -73,11 +76,11 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Image.asset('assets/images/logo.png', height: 60),
               ),
             ),
-            _buildDrawerItem(context, Icons.home_outlined, 'Home', const HomeScreen()),
-            _buildDrawerItem(context, Icons.list_alt, 'My Bookings', const MyBookingsScreen()),
-            _buildDrawerItem(context, Icons.notifications_none, 'Notifications', const NotificationScreen()),
-            _buildDrawerItem(context, Icons.bookmark_border, 'Saved', const SavedScreen()),
-            _buildDrawerItem(context, Icons.person_outline, 'Profile', const AccountScreen()),
+            _buildDrawerItem(Icons.home_outlined, 'Home'),
+            _buildDrawerItem(Icons.list_alt, 'My Bookings'),
+            _buildDrawerItem(Icons.notifications_none, 'Notifications'),
+            _buildDrawerItem(Icons.bookmark_border, 'Saved'),
+            _buildDrawerItem(Icons.person_outline, 'Profile'),
           ],
         ),
       ),
@@ -92,29 +95,17 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.menu, color: Colors.black),
-                          onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                        ),
-                        const Text(
-                          'Profile',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 48),
-                      ],
-                    ),
                     const SizedBox(height: 40),
 
+                    // --- PROFILE PICTURE & INFO ---
                     Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        const CircleAvatar(
-                          radius: 50,
-                          backgroundImage: NetworkImage('https://i.pravatar.cc/150'),
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.grey.shade300,
+                          // You can uncomment this when you have user image uploads!
+                          // backgroundImage: NetworkImage('https://i.pravatar.cc/150'),
                         ),
                         Container(
                           padding: const EdgeInsets.all(6),
@@ -122,60 +113,108 @@ class _AccountScreenState extends State<AccountScreen> {
                             color: Colors.black,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                          child: const Icon(Icons.add, color: Colors.white, size: 18),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Chath',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          'John Doe', // You can fetch the real name from Firestore later
+                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.edit_outlined, size: 20, color: Colors.black87),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       userEmail,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    _buildProfileOption(Icons.directions_car_outlined, 'My Vehicles'),
-                    _buildProfileOption(Icons.credit_card, 'Payment Methods'),
-                    _buildProfileOption(Icons.settings_outlined, 'Settings'),
-                    _buildProfileOption(Icons.help_outline, 'Help & Support'),
-                    
-                    const SizedBox(height: 24),
-
-                    InkWell(
-                      onTap: _logout,
-                      borderRadius: BorderRadius.circular(16),
+                    // --- LOYALTY SHORTCUT CARD ---
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to the Loyalty Screen!
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoyaltyScreen()),
+                        );
+                      },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.grey.shade300, // Matches your flat grey design
+                          borderRadius: BorderRadius.circular(24),
                         ),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.logout, color: Colors.redAccent),
-                            SizedBox(width: 16),
-                            Text(
-                              'Log Out',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.redAccent,
-                              ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text(
+                                  'PLATINUM',
+                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                                ),
+                                // Replace with your Image.asset badge when ready!
+                                Icon(Icons.workspace_premium, color: Colors.blueAccent, size: 40),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Book 2 More Services to Get Elite',
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            // Progress Bar
+                            Stack(
+                              children: [
+                                Container(
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade400,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                Container(
+                                  height: 16,
+                                  width: MediaQuery.of(context).size.width * 0.45, // Simulates the progress fill
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    const Divider(color: Colors.grey, thickness: 1),
+                    const SizedBox(height: 16),
+
+                    // --- CLEAN MENU OPTIONS ---
+                    _buildMenuRow(Icons.shield_outlined, 'Privacy And Security', () {}),
+                    _buildMenuRow(Icons.credit_card, 'Payment Method', () {}),
+                    _buildMenuRow(Icons.help_outline, 'Help & Support', () {}),
+                    _buildMenuRow(Icons.outlined_flag, 'Report a problem', () {}),
+                    _buildMenuRow(Icons.person_add_alt_1_outlined, 'Add account', () {}),
+                    _buildMenuRow(Icons.logout, 'Log out', _logout), // Triggers your Firebase logout!
+                    
+                    const SizedBox(height: 40), // Extra padding for scrolling past nav bar
                   ],
                 ),
               ),
             ),
           ),
 
+          // --- ACRYLIC BLUR BOTTOM NAVIGATION BAR ---
           Positioned(
             bottom: 24,
             left: 24,
@@ -206,6 +245,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         onTap: () => _navigateTo(context, const NotificationScreen()),
                         child: _buildNavItem(Icons.notifications_none, 'Notification', false),
                       ),
+                      // Account Icon (Active)
                       _buildNavItem(Icons.person, 'Account', true),
                     ],
                   ),
@@ -218,6 +258,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  // --- HELPER METHODS ---
   void _navigateTo(BuildContext context, Widget screen) {
     Navigator.pushReplacement(
       context,
@@ -228,43 +269,30 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, Widget destination) {
+  Widget _buildDrawerItem(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.black87),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      onTap: () {
-        Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
-      },
+      onTap: () {},
     );
   }
 
-
-  Widget _buildProfileOption(IconData icon, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.black87),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
-          ),
+  // New Menu Row Helper for the clean text+icon look
+  Widget _buildMenuRow(IconData icon, String title, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.black87, size: 28),
+            const SizedBox(width: 20),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
