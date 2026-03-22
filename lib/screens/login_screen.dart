@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'create_account_screen.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
+import 'main_screen.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -25,12 +25,11 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Top Right Grey Circle
           Positioned(
             top: -50,
             right: -50,
             child: Hero(
-              tag: 'circle1', // Catches the first circle
+              tag: 'circle1',
               child: Container(
                 width: 180,
                 height: 180,
@@ -41,13 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          
-          // Bottom Left Grey Circle
           Positioned(
             bottom: -50,
             left: -50,
             child: Hero(
-              tag: 'circle2', // Catches the second circle
+              tag: 'circle2',
               child: Container(
                 width: 180,
                 height: 180,
@@ -58,8 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          // ... The rest of your SafeArea and Login form stays exactly the same
-          // Main Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -68,7 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Your actual logo instead of the car icon!
                     Image.asset('assets/images/logo.png', height: 60),
                     const SizedBox(height: 24),
                     
@@ -139,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     _isLoading = true;
                   });
 
-                  // Call the login method we wrote earlier
                   String? result = await AuthService().loginUser(
                     email: _emailController.text.trim(),
                     password: _passwordController.text.trim(),
@@ -150,10 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   });
 
                   if (result == 'success') {
-                    // Navigate straight to the Home Screen!
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(builder: (context) => const MainScreen()),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

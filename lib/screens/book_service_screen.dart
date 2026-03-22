@@ -161,68 +161,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               ),
             ),
           ),
-
-          Positioned(
-            bottom: 24,
-            left: 24,
-            right: 24,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(40),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), 
-                child: Container(
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.7), 
-                    borderRadius: BorderRadius.circular(40),
-                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation1, animation2) => const HomeScreen(),
-                              transitionDuration: Duration.zero,
-                            ),
-                          );
-                        },
-                        child: _buildNavItem(Icons.home_outlined, 'Home', false),
-                      ),
-                      _buildNavItem(Icons.calendar_today, 'Book', true),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, a1, a2) => const NotificationScreen(),
-                              transitionDuration: Duration.zero, 
-                            ),
-                          );
-                        },
-                        child: _buildNavItem(Icons.notifications_none, 'Notification', false),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (context, a1, a2) => const AccountScreen(),
-                              transitionDuration: Duration.zero, 
-                            ),
-                          );
-                        },
-                        child: _buildNavItem(Icons.person_outline, 'Account', false),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

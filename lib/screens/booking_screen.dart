@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart'; // To navigate back after a successful booking
+import 'main_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   final String centerId;
@@ -24,7 +24,6 @@ class _BookingScreenState extends State<BookingScreen> {
   String? _selectedPayment;
   bool _isBooking = false;
 
-  // Dropdown Options
   final List<String> _vehicles = ['Car', 'SUV', 'Van', 'Motorcycle'];
   final List<String> _services = ['Full Service', 'Body Wash', 'Oil Change', 'Repair'];
   final List<String> _payments = ['VISA', 'MasterCard', 'Cash on Arrival'];
@@ -41,8 +40,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       String? userId = FirebaseAuth.instance.currentUser?.uid;
-      
-      // Save to Firebase
+
       await FirebaseFirestore.instance.collection('bookings').add({
         'user_id': userId ?? 'guest_user',
         'center_id': widget.centerId,
@@ -61,10 +59,10 @@ class _BookingScreenState extends State<BookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Booking Confirmed Successfully!')),
         );
-        // Take them all the way back to the Home Screen
+
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainScreen()),
           (route) => false,
         );
       }
@@ -102,7 +100,6 @@ class _BookingScreenState extends State<BookingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // --- CALENDAR CARD ---
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -129,7 +126,6 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
               const SizedBox(height: 32),
 
-              // --- VEHICLE DROPDOWN ---
               const Text('Select Vehicle Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               const SizedBox(height: 8),
               _buildDropdown(
@@ -141,7 +137,6 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
               const SizedBox(height: 24),
 
-              // --- SERVICE DROPDOWN ---
               const Text('Select Service Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               const SizedBox(height: 8),
               _buildDropdown(
@@ -153,7 +148,6 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
               const SizedBox(height: 24),
 
-              // --- PAYMENT DROPDOWN ---
               const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               const SizedBox(height: 8),
               _buildDropdown(
@@ -161,11 +155,10 @@ class _BookingScreenState extends State<BookingScreen> {
                 value: _selectedPayment,
                 items: _payments,
                 onChanged: (val) => setState(() => _selectedPayment = val),
-                isDark: true, // This triggers the black styling from your Figma design!
+                isDark: true,
               ),
               const SizedBox(height: 40),
 
-              // --- BOOK BUTTON ---
               ElevatedButton(
                 onPressed: _isBooking ? null : _confirmBooking,
                 style: ElevatedButton.styleFrom(
@@ -190,7 +183,6 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  // Helper method to build the custom dropdowns matching your Figma file
   Widget _buildDropdown({
     required String hint,
     required String? value,
@@ -206,7 +198,7 @@ class _BookingScreenState extends State<BookingScreen> {
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: isDark ? Colors.white : Colors.black,
-        fontFamily: 'SFProRounded', // Ensures it matches your global font
+        fontFamily: 'SFProRounded',
       ),
       decoration: InputDecoration(
         hintText: hint,
