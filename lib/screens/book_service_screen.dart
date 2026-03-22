@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'service_detail_screen.dart';
 import 'home_screen.dart';
+import 'notification_screen.dart';
+
 
 class BookServiceScreen extends StatefulWidget {
   const BookServiceScreen({super.key});
@@ -189,7 +191,18 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         child: _buildNavItem(Icons.home_outlined, 'Home', false),
                       ),
                       _buildNavItem(Icons.calendar_today, 'Book', true),
-                      _buildNavItem(Icons.notifications_none, 'Notification', false),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, a1, a2) => const NotificationScreen(),
+                              transitionDuration: Duration.zero, 
+                            ),
+                          );
+                        },
+                        child: _buildNavItem(Icons.notifications_none, 'Notification', false),
+                      ),
                       _buildNavItem(Icons.person_outline, 'Account', false),
                     ],
                   ),
