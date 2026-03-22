@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'home_screen.dart';
 import 'book_service_screen.dart';
+import 'account_screen.dart';
+
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -160,7 +162,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                       
                       _buildNavItem(Icons.notifications, 'Notification', true),
-                      _buildNavItem(Icons.person_outline, 'Account', false),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, a1, a2) => const AccountScreen(),
+                              transitionDuration: Duration.zero, 
+                            ),
+                          );
+                        },
+                        child: _buildNavItem(Icons.person_outline, 'Account', false),
+                      ),
                     ],
                   ),
                 ),
