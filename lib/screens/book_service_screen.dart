@@ -70,7 +70,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Near Your Area >', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text(currentLocation, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.blue)),
+                          Text(currentLocation, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
                         ],
                       ),
                       const SizedBox(height: 16),

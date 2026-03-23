@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatMessage {
   final String text;
@@ -16,7 +17,8 @@ class AiChatbotScreen extends StatefulWidget {
 
 class _AiChatbotScreenState extends State<AiChatbotScreen> {
 
-  final String apiKey = 'AIzaSyBS3h3gt9oj3Mb2lfH3a64dIMwllMBwHbU'; 
+  final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? ''; 
+ 
   
   late final GenerativeModel _model;
   late final ChatSession _chatSession;
@@ -34,8 +36,9 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
   }
 
   void _initializeAI() {
+    print("MY API KEY IS: $apiKey");
     _model = GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash-preview',
       apiKey: apiKey,
       systemInstruction: Content.system(
         'You are the AutoLink AI Assistant. You help users with car maintenance advice, '
@@ -78,7 +81,7 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> {
 
     } catch (e) {
       setState(() {
-        _messages.add(ChatMessage(text: 'Error connecting to the AI. Please check your internet or API key.', isUser: false));
+        _messages.add(ChatMessage(text: 'Google API Error: $e', isUser: false)); 
         _isLoading = false;
       });
       _scrollToBottom();

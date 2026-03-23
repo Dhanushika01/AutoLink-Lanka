@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main_screen.dart';
-
+import 'report_problem_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   final String centerId;
@@ -27,7 +27,32 @@ class _BookingScreenState extends State<BookingScreen> {
 
   final List<String> _vehicles = ['Car', 'SUV', 'Van', 'Motorcycle'];
   final List<String> _services = ['Full Service', 'Body Wash', 'Oil Change', 'Repair'];
-  final List<String> _payments = ['VISA', 'MasterCard', 'Cash on Arrival'];
+  
+  List<String> _payments = ['Cash on Arrival'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCards();
+  }
+
+  Future<void> _loadSavedCards() async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+    
+    var snapshot = await FirebaseFirestore.instance.collection('saved_cards').where('user_id', isEqualTo: userId).get();
+    
+    List<String> loadedCards = ['Cash on Arrival'];
+    for (var doc in snapshot.docs) {
+      loadedCards.add('•••• ${doc['last4']}');
+    }
+    
+    if (mounted) {
+      setState(() {
+        _payments = loadedCards;
+      });
+    }
+  }
 
   Future<void> _confirmBooking() async {
     if (_selectedVehicle == null || _selectedService == null || _selectedPayment == null) {
@@ -41,6 +66,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       String? userId = FirebaseAuth.instance.currentUser?.uid;
+
       await FirebaseFirestore.instance.collection('bookings').add({
         'user_id': userId ?? 'guest_user',
         'center_id': widget.centerId,
@@ -103,6 +129,14 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.outlined_flag, color: Colors.black),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportProblemScreen()));
+            },
+          )
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -116,24 +150,30 @@ class _BookingScreenState extends State<BookingScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.grey.shade300),
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    )
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
                   ],
                 ),
-                child: CalendarDatePicker(
-                  initialDate: _selectedDate,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                  onDateChanged: (date) {
-                    setState(() {
-                      _selectedDate = date;
-                    });
-                  },
+                child: Theme(
+                  data: ThemeData(
+                    colorScheme: const ColorScheme.light(
+                      primary: Colors.black,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.black,
+                    ),
+                  ),
+                  child: CalendarDatePicker(
+                    initialDate: _selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    onDateChanged: (date) {
+                      setState(() {
+                        _selectedDate = date;
+                      });
+                    },
+                  ),
                 ),
               ),
+              
               const SizedBox(height: 32),
 
               const Text('Select Vehicle Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -201,7 +241,7 @@ class _BookingScreenState extends State<BookingScreen> {
     required bool isDark,
   }) {
     return DropdownButtonFormField<String>(
-      initialValue: value,
+      value: (value != null && items.contains(value)) ? value : null, 
       icon: Icon(Icons.keyboard_arrow_down, color: isDark ? Colors.white : Colors.black),
       dropdownColor: isDark ? Colors.grey.shade900 : Colors.white,
       style: TextStyle(

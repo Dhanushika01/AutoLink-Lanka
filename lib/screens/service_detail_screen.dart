@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:share_plus/share_plus.dart';
 import 'booking_screen.dart';
+import 'report_problem_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final String centerId;
@@ -221,13 +222,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       Text(address, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, height: 1.5)),
                       const SizedBox(height: 40),
 
-                      Center(
-                        child: TextButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.report_problem_outlined, color: Colors.black),
-                          label: const Text('Report an issue', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportProblemScreen()));
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.grey, size: 20),
+                  SizedBox(width: 8),
+                  Text('Report an issue', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14)),
+                ],
+              ),
+            ),
                       const SizedBox(height: 40),
                     ],
                   ),
